@@ -1,0 +1,56 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.html
+coverage.txt
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# Build output folders
+# Removed leading slash to catch 'bin/' anywhere in the project
+bin/
+dist/
+tmp/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.iml
+
+# OS specific files
+Thumbs.db
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+
+# ------------------------------------------------
+# Project Specifics
+# ------------------------------------------------
+
+# Runtime output files (Don't commit results of the tool)
+output.csv
+results.csv
+
+# Input test files (Optional: ignore temporary test inputs)
+test_domains.csv
+
+# Allow specific fixture files if you need them for integration tests
+!fixtures/*.csv
