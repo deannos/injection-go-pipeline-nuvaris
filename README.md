@@ -25,7 +25,17 @@ injection-go-pipeline-nuvaris/
 ├── go.sum
 └── README.md
 
+
 ```
+---
+
+### Architecture HLD
+
+
+![High level diagram for injection pipeline ](assets/HLDv1.png)
+
+---
+
 
 ### Back of Envelope Calculations 
 
@@ -123,7 +133,7 @@ Max bills/sec ≈ min(
 
 ```
 
-
+---
 ### kafka commands 
 
 #### Note : Kafka CLI tools are located under /opt/kafka/bin in the official Apache Kafka Docker image. Commands must be run from there or referenced with full path.
@@ -348,3 +358,5 @@ tail -f /opt/kafka/logs/controller.log
 - 4️⃣ `kafka-console-consumer.sh` → can I read?
 - 5️⃣ `kafka-consumer-groups.sh` → lag growing?
 - 6️⃣ Kafka logs → broker errors
+
+--- 
