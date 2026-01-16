@@ -54,3 +54,5 @@ test_domains.csv
 
 # Allow specific fixture files if you need them for integration tests
 !fixtures/*.csv
+datagen
+injector
