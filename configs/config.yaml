@@ -1,0 +1,45 @@
+# configs/config.yaml
+server:
+  port: 8080
+  read_timeout: 10s # Timeout for reading the entire request, including body
+  write_timeout: 10s # Timeout for writing the response
+  idle_timeout: 60s  # Timeout for keeping an idle connection open
+
+kafka:
+  brokers:
+    - "localhost:9092" # Use service name if Kafka is in Docker Compose
+  topic: "electricity-bills"
+  dlq_topic: "electricity-bills-dlq"
+  producer:
+    # Sarama producer settings
+    required_acks: "leader" # "none", "leader", "all"
+    compression_codec: "snappy" # "none", "gzip", "snappy", "lz4", "zstd"
+    flush_frequency: 5ms
+    flush_messages: 10000
+    flush_bytes: 1048576 # 1MB
+    retry_max: 5
+    retry_backoff: 100ms
+    return_successes: false # Set to true to track successes, false for perf
+    return_errors: true
+    channel_buffer_size: 256 # Default is often fine
+
+injector:
+  event_channel_capacity: 100000 # Capacity of the main event channel
+  num_workers: 24               # Number of worker goroutines
+  rate_limit_per_second: 60000 # Approximate max events/sec from API (3.6M/min)
+
+  retry:
+    channel_capacity: 5000      # Capacity of the retry channel
+    num_workers: 10             # Number of retry worker goroutines
+    max_retries: 3              # Max retry attempts by retry workers (on top of producer retries)
+    initial_backoff: 100ms      # Initial backoff for retry workers
+    max_backoff: 5s              # Maximum backoff for retry workers
+    backoff_multiplier: 2.0      # Multiplier for exponential backoff
+
+logging:
+  level: "info" # "debug", "info", "warn", "error"
+  format: "json" # "json", "console"
+
+metrics:
+  enabled: true
+  path: "/metrics"

@@ -1,0 +1,63 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  kafka:
+    # Using Confluent Platform Kafka image which supports KRaft
+    # For a pure Apache Kafka image with KRaft, you might use apache/kafka:latest
+    # and adjust environment variables accordingly.
+    # image: confluentinc/cp-kafka:7.4.0 # Example Confluent version
+    image: apache/kafka:3.7.0 # Official Apache Kafka image (supports KRaft)
+    container_name: kafka-injector-kafka
+    ports:
+      - "9092:9092" # Expose Kafka to host machine
+      # - "29092:29092" # Internal listener, if needed for debugging from host with tools expecting it
+    environment:
+      # KRaft Mode Configuration
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093 # Use the service name 'kafka' and internal controller port
+      # Listeners
+      # PLAINTEXT_HOST is for external clients (like our Go app on host)
+      # PLAINTEXT is for internal communication (if other brokers/controllers, or internal tools)
+      # CONTROLLER is for controller communication
+      KAFKA_LISTENERS: PLAINTEXT_HOST://:9092,PLAINTEXT://:29092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:9092,PLAINTEXT://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT # Listener for inter-broker communication
+
+      # KRaft specific settings
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+
+      # Optional: Set a specific cluster ID for KRaft or let Kafka generate one.
+      # To generate a new one: kafka-storage random-uuid
+      # KAFKA_CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+      # If using a version that needs explicit KRaft format setup (some older versions did)
+      # You might need to run a command to format the storage directories.
+      # For apache/kafka:3.7.0, this is typically handled automatically on first start.
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server=localhost:9092 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Optional: Kafka UI or other management tools
+  # kafka-ui:
+  #   image: provectuslabs/kafka-ui:latest
+  #   container_name: kafka-injector-ui
+  #   ports:
+  #     - "8081:8080"
+  #   environment:
+  #     KAFKA_CLUSTERS_0_NAME: local
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092 # Connect to Kafka's internal listener
+  #   depends_on:
+  #     - kafka
+
+volumes:
+  kafka_data:
